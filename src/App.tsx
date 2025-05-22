@@ -13,7 +13,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import RequireAuth from "./components/RequireAuth";
-import SkillsDemo from "./pages/SkillsDemo"; // Import the new demo page
+import SkillsDemo from "./pages/SkillsDemo"; 
+import VerifySkill from "./pages/VerifySkill"; // Import the new verify skill page
 
 const queryClient = new QueryClient();
 
@@ -27,7 +28,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/browse" element={<BrowseSkills />} />
-            <Route path="/skills-demo" element={<SkillsDemo />} /> {/* Add the new route */}
+            <Route path="/skills-demo" element={<SkillsDemo />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             
@@ -35,6 +36,11 @@ const App = () => (
             <Route path="/dashboard" element={
               <RequireAuth>
                 <Dashboard />
+              </RequireAuth>
+            } />
+            <Route path="/verify-skill" element={
+              <RequireAuth>
+                <VerifySkill />
               </RequireAuth>
             } />
             

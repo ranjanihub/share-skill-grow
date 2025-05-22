@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Check } from 'lucide-react';
 
 export interface Skill {
   id: string;
@@ -17,6 +18,7 @@ export interface Skill {
     avatar?: string;
   };
   skillsWanted: string[];
+  isVerified?: boolean;
 }
 
 interface SkillCardProps {
@@ -40,7 +42,14 @@ export const SkillCard = ({ skill, onRequestSwap }: SkillCardProps) => {
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle>{skill.title}</CardTitle>
+            <div className="flex items-center gap-2">
+              <CardTitle>{skill.title}</CardTitle>
+              {skill.isVerified && (
+                <Badge className="bg-green-100 text-green-800 flex items-center">
+                  <Check className="h-3 w-3 mr-1" /> Verified
+                </Badge>
+              )}
+            </div>
             <CardDescription className="mt-1">{skill.category}</CardDescription>
           </div>
           <Badge className={getLevelColor(skill.level)}>{skill.level}</Badge>
