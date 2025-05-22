@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -15,9 +15,15 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [agreeTerms, setAgreeTerms] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, user, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,22 +44,16 @@ const Signup = () => {
       return;
     }
     
-    setIsLoading(true);
-    
     try {
       const { error } = await signUp(email, password, { full_name: name });
       
-      if (error) {
-        toast.error(error.message || "Failed to create account");
-      } else {
-        toast.success("Account created successfully! Check your email for verification.");
-        navigate('/dashboard');
+      if (!error) {
+        // Auth context handles the redirect and toast
+        console.log("Signup successful");
       }
     } catch (error) {
       toast.error("An unexpected error occurred");
       console.error(error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -79,6 +79,7 @@ const Signup = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
+                      disabled={isLoading}
                     />
                   </div>
                   
@@ -91,6 +92,7 @@ const Signup = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      disabled={isLoading}
                     />
                   </div>
                   
@@ -102,6 +104,7 @@ const Signup = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      disabled={isLoading}
                     />
                   </div>
                   
@@ -113,6 +116,7 @@ const Signup = () => {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
+                      disabled={isLoading}
                     />
                   </div>
                   

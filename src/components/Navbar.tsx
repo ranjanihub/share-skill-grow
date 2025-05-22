@@ -12,13 +12,15 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Loader2 } from 'lucide-react';
 
 export const Navbar = () => {
   const isMobile = useIsMobile();
-  const { user, signOut } = useAuth();
+  const { user, signOut, isLoading } = useAuth();
 
   const handleSignOut = async () => {
     await signOut();
+    // The signOut function in AuthContext handles the redirection
   };
 
   return (
@@ -32,7 +34,11 @@ export const Navbar = () => {
         {isMobile ? (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              {user ? (
+              {isLoading ? (
+                <Button variant="outline" size="icon">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                </Button>
+              ) : user ? (
                 <Avatar className="cursor-pointer">
                   <AvatarImage src={user.user_metadata?.avatar_url} />
                   <AvatarFallback>{user.email?.charAt(0).toUpperCase()}</AvatarFallback>
@@ -49,6 +55,9 @@ export const Navbar = () => {
               <DropdownMenuItem asChild>
                 <Link to="/browse">Browse Skills</Link>
               </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/skills-demo">Skills Demo</Link>
+              </DropdownMenuItem>
               
               {user ? (
                 <>
@@ -56,8 +65,19 @@ export const Navbar = () => {
                     <Link to="/dashboard">My Dashboard</Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut}>
-                    Sign out
+                  <DropdownMenuItem 
+                    onClick={handleSignOut}
+                    disabled={isLoading}
+                    className="text-red-600 focus:text-red-600"
+                  >
+                    {isLoading ? (
+                      <span className="flex items-center">
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing out...
+                      </span>
+                    ) : (
+                      "Sign out"
+                    )}
                   </DropdownMenuItem>
                 </>
               ) : (
@@ -75,8 +95,14 @@ export const Navbar = () => {
         ) : (
           <div className="flex items-center space-x-6">
             <Link to="/browse" className="text-gray-600 hover:text-skillswap-primary transition-colors">Browse Skills</Link>
+            <Link to="/skills-demo" className="text-gray-600 hover:text-skillswap-primary transition-colors">Skills Demo</Link>
             
-            {user ? (
+            {isLoading ? (
+              <Button variant="outline" disabled>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
+              </Button>
+            ) : user ? (
               <>
                 <Link to="/dashboard" className="text-gray-600 hover:text-skillswap-primary transition-colors">My Dashboard</Link>
                 <DropdownMenu>
@@ -91,8 +117,19 @@ export const Navbar = () => {
                       <Link to="/dashboard">My Dashboard</Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut}>
-                      Sign out
+                    <DropdownMenuItem 
+                      onClick={handleSignOut}
+                      disabled={isLoading} 
+                      className="text-red-600 focus:text-red-600"
+                    >
+                      {isLoading ? (
+                        <span className="flex items-center">
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Signing out...
+                        </span>
+                      ) : (
+                        "Sign out"
+                      )}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>

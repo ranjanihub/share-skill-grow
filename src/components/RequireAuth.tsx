@@ -1,6 +1,8 @@
 
+import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Loader2 } from "lucide-react";
 
 interface RequireAuthProps {
   children: React.ReactNode;
@@ -11,7 +13,12 @@ const RequireAuth: React.FC<RequireAuthProps> = ({ children }) => {
   const location = useLocation();
 
   if (isLoading) {
-    return <div className="flex items-center justify-center h-screen">Loading...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-skillswap-primary mb-4" />
+        <p className="text-skillswap-dark">Loading your session...</p>
+      </div>
+    );
   }
 
   if (!user) {

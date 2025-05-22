@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,11 +11,17 @@ import { useAuth } from '@/contexts/AuthContext';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { signIn } = useAuth();
+  const { signIn, user, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/dashboard';
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user) {
+      navigate(from, { replace: true });
+    }
+  }, [user, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,22 +31,16 @@ const Login = () => {
       return;
     }
     
-    setIsLoading(true);
-    
     try {
       const { error } = await signIn(email, password);
       
-      if (error) {
-        toast.error(error.message || "Failed to sign in");
-      } else {
-        toast.success("Login successful!");
-        navigate(from, { replace: true });
+      if (!error) {
+        // Auth context handles the redirect
+        console.log("Login successful");
       }
     } catch (error) {
       toast.error("An unexpected error occurred");
       console.error(error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -67,6 +67,7 @@ const Login = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      disabled={isLoading}
                     />
                   </div>
                   <div className="space-y-2">
@@ -82,6 +83,7 @@ const Login = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      disabled={isLoading}
                     />
                   </div>
                   
