@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from "lucide-react";
 import LinkedInLoginButton from '@/components/LinkedInLoginButton';
+import GoogleLoginButton from '@/components/GoogleLoginButton';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -101,7 +102,10 @@ const Login = () => {
             </div>
           </div>
           
-          <LinkedInLoginButton />
+          <div className="space-y-2">
+            <LinkedInLoginButton />
+            <GoogleLoginButton />
+          </div>
         </CardContent>
         <CardFooter>
           <p className="text-center text-sm text-muted-foreground w-full">

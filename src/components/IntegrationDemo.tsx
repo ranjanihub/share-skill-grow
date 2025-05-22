@@ -2,6 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import LinkedInLoginButton from './LinkedInLoginButton';
+import GoogleLoginButton from './GoogleLoginButton';
 import GoogleCalendarIntegration from './GoogleCalendarIntegration';
 
 const IntegrationDemo = () => {
@@ -12,19 +13,20 @@ const IntegrationDemo = () => {
       <div className="grid md:grid-cols-2 gap-8">
         <Card>
           <CardHeader>
-            <CardTitle>LinkedIn Authentication</CardTitle>
+            <CardTitle>Social Authentication</CardTitle>
             <CardDescription>
-              Sign in with your LinkedIn account to access SkillSwap features
+              Sign in with your social accounts to access SkillSwap features
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="mb-4">
-              LinkedIn integration allows users to login with their professional account,
-              making it easier to connect with others who share similar skills or interests.
+              Social login integrations allow users to login with their existing accounts,
+              making it easier to get started with SkillSwap. Choose from LinkedIn or Google.
             </p>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col space-y-2">
             <LinkedInLoginButton />
+            <GoogleLoginButton />
           </CardFooter>
         </Card>
         
