@@ -18,6 +18,7 @@ type AuthContextType = {
     data: any;
   }>;
   signOut: () => Promise<void>;
+  signInWithLinkedIn: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -109,6 +110,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithLinkedIn = async () => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+      
+      if (error) {
+        toast.error(error.message || "Failed to sign in with LinkedIn");
+        console.error('LinkedIn login error:', error.message);
+        setIsLoading(false);
+      }
+      // No need to navigate here as the OAuth redirect will handle it
+    } catch (error) {
+      console.error('Unexpected LinkedIn login error:', error);
+      toast.error("An unexpected error occurred");
+      setIsLoading(false);
+    }
+  };
+
   const signOut = async () => {
     setIsLoading(true);
     try {
@@ -130,7 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, isLoading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{ session, user, isLoading, signIn, signUp, signOut, signInWithLinkedIn }}>
       {children}
     </AuthContext.Provider>
   );
