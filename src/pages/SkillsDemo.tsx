@@ -1,6 +1,6 @@
 
 import React from 'react';
-import Layout from '@/components/Layout';
+import { Layout } from '@/components/Layout';
 import IntegrationDemo from '@/components/IntegrationDemo';
 
 const SkillsDemo = () => {
