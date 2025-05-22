@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { SkillCard, Skill } from '@/components/SkillCard';
@@ -11,6 +11,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Loader2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -18,66 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-// Mock data
-const mySkills: Skill[] = [
-  {
-    id: '100',
-    title: 'Web Development',
-    description: 'HTML, CSS, JavaScript and React. I can help you build responsive websites and web applications.',
-    category: 'Programming',
-    level: 'Advanced',
-    user: { id: 'current-user', name: 'Current User', avatar: undefined },
-    skillsWanted: ['Cooking', 'Photography', 'Spanish Language']
-  },
-  {
-    id: '101',
-    title: 'Digital Marketing',
-    description: 'Social media marketing, SEO, content marketing, and analytics. I can help you market your business online.',
-    category: 'Marketing',
-    level: 'Intermediate',
-    user: { id: 'current-user', name: 'Current User', avatar: undefined },
-    skillsWanted: ['Graphic Design', 'Public Speaking', 'Video Editing']
-  },
-];
-
-const incomingRequests: MatchRequest[] = [
-  {
-    id: 'r1',
-    status: 'pending',
-    date: '2023-06-15',
-    otherUser: { id: 'u3', name: 'Carlos Rodriguez', avatar: undefined },
-    skillOffered: { id: '3', title: 'Financial Planning' },
-    skillRequested: { id: '100', title: 'Web Development' }
-  },
-  {
-    id: 'r2',
-    status: 'accepted',
-    date: '2023-06-10',
-    otherUser: { id: 'u7', name: 'Michael Lee', avatar: undefined },
-    skillOffered: { id: '7', title: 'Photography Basics' },
-    skillRequested: { id: '101', title: 'Digital Marketing' }
-  }
-];
-
-const outgoingRequests: MatchRequest[] = [
-  {
-    id: 'r3',
-    status: 'pending',
-    date: '2023-06-14',
-    otherUser: { id: 'u2', name: 'Maya Johnson', avatar: undefined },
-    skillOffered: { id: '100', title: 'Web Development' },
-    skillRequested: { id: '2', title: 'Digital Illustration' }
-  },
-  {
-    id: 'r4',
-    status: 'rejected',
-    date: '2023-06-08',
-    otherUser: { id: 'u8', name: 'Sophia Romano', avatar: undefined },
-    skillOffered: { id: '101', title: 'Digital Marketing' },
-    skillRequested: { id: '8', title: 'Italian Cooking' }
-  }
-];
 
 // Category options
 const categoryOptions = [
@@ -99,6 +42,7 @@ const categoryOptions = [
 const levelOptions = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [addSkillOpen, setAddSkillOpen] = useState(false);
   const [newSkill, setNewSkill] = useState({
     title: '',
@@ -107,39 +51,227 @@ const Dashboard = () => {
     level: '',
     skillsWanted: [''] as string[]
   });
+  
+  // State for skills data
+  const [mySkills, setMySkills] = useState<Skill[]>([]);
+  const [incomingRequests, setIncomingRequests] = useState<MatchRequest[]>([]);
+  const [outgoingRequests, setOutgoingRequests] = useState<MatchRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAcceptRequest = (id: string) => {
-    // In a real app, this would call an API
-    console.log(`Accepting request ${id}`);
-    toast.success("Request accepted! You can now schedule a session.");
+  // Fetch user's skills when component mounts
+  useEffect(() => {
+    if (user) {
+      fetchUserSkills();
+      fetchMatchRequests();
+    }
+  }, [user]);
+
+  // Fetch user's skills from Supabase
+  const fetchUserSkills = async () => {
+    try {
+      setIsLoading(true);
+      
+      // For now, use mock data as this is a frontend-only implementation
+      // In a real app with Supabase tables set up, you would use:
+      // const { data, error } = await supabase
+      //   .from('skills')
+      //   .select('*')
+      //   .eq('user_id', user.id);
+      
+      // if (error) throw error;
+      
+      // Mock data for frontend development
+      const mockSkills: Skill[] = [
+        {
+          id: '100',
+          title: 'Web Development',
+          description: 'HTML, CSS, JavaScript and React. I can help you build responsive websites and web applications.',
+          category: 'Programming',
+          level: 'Advanced',
+          user: { id: user?.id || 'current-user', name: user?.user_metadata?.full_name || 'Current User', avatar: undefined },
+          skillsWanted: ['Cooking', 'Photography', 'Spanish Language']
+        },
+        {
+          id: '101',
+          title: 'Digital Marketing',
+          description: 'Social media marketing, SEO, content marketing, and analytics. I can help you market your business online.',
+          category: 'Marketing',
+          level: 'Intermediate',
+          user: { id: user?.id || 'current-user', name: user?.user_metadata?.full_name || 'Current User', avatar: undefined },
+          skillsWanted: ['Graphic Design', 'Public Speaking', 'Video Editing']
+        },
+      ];
+      
+      setMySkills(mockSkills);
+    } catch (error) {
+      console.error('Error fetching skills:', error);
+      toast.error('Failed to load your skills');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleRejectRequest = (id: string) => {
-    // In a real app, this would call an API
-    console.log(`Rejecting request ${id}`);
-    toast.success("Request declined.");
+  // Fetch match requests
+  const fetchMatchRequests = async () => {
+    try {
+      // Mock data for frontend development
+      // In a real app, you would fetch from Supabase
+      const mockIncomingRequests: MatchRequest[] = [
+        {
+          id: 'r1',
+          status: 'pending',
+          date: '2023-06-15',
+          otherUser: { id: 'u3', name: 'Carlos Rodriguez', avatar: undefined },
+          skillOffered: { id: '3', title: 'Financial Planning' },
+          skillRequested: { id: '100', title: 'Web Development' }
+        },
+        {
+          id: 'r2',
+          status: 'accepted',
+          date: '2023-06-10',
+          otherUser: { id: 'u7', name: 'Michael Lee', avatar: undefined },
+          skillOffered: { id: '7', title: 'Photography Basics' },
+          skillRequested: { id: '101', title: 'Digital Marketing' }
+        }
+      ];
+      
+      const mockOutgoingRequests: MatchRequest[] = [
+        {
+          id: 'r3',
+          status: 'pending',
+          date: '2023-06-14',
+          otherUser: { id: 'u2', name: 'Maya Johnson', avatar: undefined },
+          skillOffered: { id: '100', title: 'Web Development' },
+          skillRequested: { id: '2', title: 'Digital Illustration' }
+        },
+        {
+          id: 'r4',
+          status: 'rejected',
+          date: '2023-06-08',
+          otherUser: { id: 'u8', name: 'Sophia Romano', avatar: undefined },
+          skillOffered: { id: '101', title: 'Digital Marketing' },
+          skillRequested: { id: '8', title: 'Italian Cooking' }
+        }
+      ];
+      
+      setIncomingRequests(mockIncomingRequests);
+      setOutgoingRequests(mockOutgoingRequests);
+    } catch (error) {
+      console.error('Error fetching match requests:', error);
+    }
   };
 
-  const handleAddSkill = () => {
+  const handleAddSkill = async () => {
     // Validation
     if (!newSkill.title || !newSkill.description || !newSkill.category || !newSkill.level) {
       toast.error("Please fill in all required fields");
       return;
     }
     
-    // In a real app, this would call an API
-    console.log("Adding new skill:", newSkill);
-    toast.success("New skill added successfully!");
-    setAddSkillOpen(false);
-    
-    // Reset form
-    setNewSkill({
-      title: '',
-      description: '',
-      category: '',
-      level: '',
-      skillsWanted: ['']
-    });
+    try {
+      setIsSubmitting(true);
+      
+      // For a real app with Supabase tables set up, you would use:
+      // const { data, error } = await supabase
+      //   .from('skills')
+      //   .insert([
+      //     {
+      //       user_id: user.id,
+      //       title: newSkill.title,
+      //       description: newSkill.description,
+      //       category: newSkill.category,
+      //       level: newSkill.level,
+      //       skills_wanted: newSkill.skillsWanted.filter(skill => skill.trim() !== '')
+      //     }
+      //   ])
+      //   .select();
+      //
+      // if (error) throw error;
+      
+      // For frontend-only implementation, create a mock skill
+      const newMockSkill: Skill = {
+        id: `${Date.now()}`,
+        title: newSkill.title,
+        description: newSkill.description,
+        category: newSkill.category,
+        level: newSkill.level,
+        user: {
+          id: user?.id || 'current-user',
+          name: user?.user_metadata?.full_name || 'Current User',
+          avatar: user?.user_metadata?.avatar_url
+        },
+        skillsWanted: newSkill.skillsWanted.filter(skill => skill.trim() !== '')
+      };
+      
+      // Update local state
+      setMySkills(prevSkills => [...prevSkills, newMockSkill]);
+      
+      toast.success("New skill added successfully!");
+      setAddSkillOpen(false);
+      
+      // Reset form
+      setNewSkill({
+        title: '',
+        description: '',
+        category: '',
+        level: '',
+        skillsWanted: ['']
+      });
+    } catch (error) {
+      console.error('Error adding skill:', error);
+      toast.error("Failed to add new skill");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleAcceptRequest = async (id: string) => {
+    try {
+      // For a real app with Supabase tables set up, you would use:
+      // const { error } = await supabase
+      //   .from('match_requests')
+      //   .update({ status: 'accepted' })
+      //   .eq('id', id);
+      // 
+      // if (error) throw error;
+      
+      // Update local state for frontend-only implementation
+      setIncomingRequests(prevRequests =>
+        prevRequests.map(request =>
+          request.id === id ? { ...request, status: 'accepted' } : request
+        )
+      );
+      
+      toast.success("Request accepted! You can now schedule a session.");
+    } catch (error) {
+      console.error('Error accepting request:', error);
+      toast.error("Failed to accept request");
+    }
+  };
+
+  const handleRejectRequest = async (id: string) => {
+    try {
+      // For a real app with Supabase tables set up, you would use:
+      // const { error } = await supabase
+      //   .from('match_requests')
+      //   .update({ status: 'rejected' })
+      //   .eq('id', id);
+      // 
+      // if (error) throw error;
+      
+      // Update local state for frontend-only implementation
+      setIncomingRequests(prevRequests =>
+        prevRequests.map(request =>
+          request.id === id ? { ...request, status: 'rejected' } : request
+        )
+      );
+      
+      toast.success("Request declined.");
+    } catch (error) {
+      console.error('Error rejecting request:', error);
+      toast.error("Failed to decline request");
+    }
   };
 
   const addWantedSkill = () => {
@@ -164,6 +296,9 @@ const Dashboard = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-white mb-4 md:mb-0">
               <h1 className="text-2xl font-bold">My Dashboard</h1>
+              <p className="text-white/80">
+                Welcome, {user?.user_metadata?.full_name || user?.email}
+              </p>
               <p className="text-white/80">Manage your skills and swap requests</p>
             </div>
             <Dialog open={addSkillOpen} onOpenChange={setAddSkillOpen}>
@@ -283,8 +418,19 @@ const Dashboard = () => {
                   <Button type="button" variant="secondary" onClick={() => setAddSkillOpen(false)}>
                     Cancel
                   </Button>
-                  <Button type="button" onClick={handleAddSkill}>
-                    Add Skill
+                  <Button 
+                    type="button" 
+                    onClick={handleAddSkill}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Adding...
+                      </>
+                    ) : (
+                      'Add Skill'
+                    )}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -304,29 +450,35 @@ const Dashboard = () => {
             </TabsList>
             
             <TabsContent value="my-skills">
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {mySkills.map((skill) => (
-                  <SkillCard key={skill.id} skill={skill} />
-                ))}
-                <Card className="flex items-center justify-center h-full min-h-[300px] border-dashed">
-                  <CardContent className="text-center">
-                    <div className="p-4 rounded-full bg-gray-100 inline-flex mx-auto mb-4">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M12 8v8M8 12h8"/>
-                      </svg>
-                    </div>
-                    <h3 className="font-medium mb-1">Add a New Skill</h3>
-                    <p className="text-gray-500 text-sm mb-4">Share what you can teach others</p>
-                    <Button 
-                      variant="outline" 
-                      onClick={() => setAddSkillOpen(true)}
-                    >
-                      Add Skill
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
+              {isLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-skillswap-primary" />
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {mySkills.map((skill) => (
+                    <SkillCard key={skill.id} skill={skill} />
+                  ))}
+                  <Card className="flex items-center justify-center h-full min-h-[300px] border-dashed">
+                    <CardContent className="text-center">
+                      <div className="p-4 rounded-full bg-gray-100 inline-flex mx-auto mb-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M12 8v8M8 12h8"/>
+                        </svg>
+                      </div>
+                      <h3 className="font-medium mb-1">Add a New Skill</h3>
+                      <p className="text-gray-500 text-sm mb-4">Share what you can teach others</p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setAddSkillOpen(true)}
+                      >
+                        Add Skill
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </TabsContent>
             
             <TabsContent value="incoming">

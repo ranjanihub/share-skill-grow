@@ -113,8 +113,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(true);
     try {
       await supabase.auth.signOut();
+      // Clear any local state that might contain user data
+      setUser(null);
+      setSession(null);
+      
       toast.success("Logged out successfully");
       console.log('Logout successful, redirecting to login');
+      // After logout, redirect to the login page
       navigate('/login');
     } catch (error) {
       console.error('Logout error:', error);
