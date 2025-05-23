@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -209,7 +208,23 @@ export const useDashboard = () => {
         )
       );
       
-      toast.success("Request accepted! You can now schedule a session.");
+      // Create a notification for the other user
+      const acceptedRequest = incomingRequests.find(request => request.id === id);
+      if (acceptedRequest) {
+        // In a real app, you would insert a notification in the database
+        // const { error: notificationError } = await supabase
+        //   .from('notifications')
+        //   .insert({
+        //     user_id: acceptedRequest.otherUser.id,
+        //     type: 'match_accepted',
+        //     content: `${user?.user_metadata?.full_name || 'Someone'} has accepted your match request!`,
+        //     related_entity_id: id
+        //   });
+        
+        console.log('Notification would be sent to:', acceptedRequest.otherUser.id);
+      }
+      
+      toast.success("Request accepted! You can now chat and schedule a session.");
     } catch (error) {
       console.error('Error accepting request:', error);
       toast.error("Failed to accept request");

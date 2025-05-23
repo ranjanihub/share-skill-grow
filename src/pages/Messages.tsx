@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { ChatList } from '@/components/chat/ChatList';
 import { ChatWindow } from '@/components/chat/ChatWindow';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLocation } from 'react-router-dom';
 
 interface Profile {
   id: string;
@@ -13,7 +14,15 @@ interface Profile {
 
 const Messages = () => {
   const { user } = useAuth();
+  const location = useLocation();
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+
+  // Handle navigation from SessionsTab
+  useEffect(() => {
+    if (location.state?.selectedProfile) {
+      setSelectedProfile(location.state.selectedProfile);
+    }
+  }, [location.state]);
 
   if (!user) {
     return (
