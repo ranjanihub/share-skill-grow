@@ -14,7 +14,8 @@ import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import RequireAuth from "./components/RequireAuth";
 import SkillsDemo from "./pages/SkillsDemo"; 
-import VerifySkill from "./pages/VerifySkill"; // Import the new verify skill page
+import VerifySkill from "./pages/VerifySkill";
+import Messages from "./pages/Messages";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,11 @@ const App = () => (
             <Route path="/verify-skill" element={
               <RequireAuth>
                 <VerifySkill />
+              </RequireAuth>
+            } />
+            <Route path="/messages" element={
+              <RequireAuth>
+                <Messages />
               </RequireAuth>
             } />
             
